@@ -1,49 +1,32 @@
-const form =document.getElementById("github-form")
-const userList = document.getElementById("user-list")
-const reposlist= document.getElementById("repos-list")
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.querySelector("#github-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      let search = document.getElementById("search").value;
+      fetch(`https://api.github.com/search/users?q=${search}`)
+        .then((res) => res.json())
+        .then((data) => {
+          data.items.forEach((user) => {
+            let ul = document.getElementById("user-list");
+            let li = document.createElement("li");
+            let img = document.createElement("img");
+            let h5 = document.createElement("h5");
+            let h4 = document.createElement("h4");
+            let a = document.createElement("a");
+            let profile = document.createTextNode("View Profile");
 
-// display users
-const getUsers = function(e){
-    e.preventDefault()
-    const user = document.getElementById("search").value
-    fetch(`https://api.github.com/search/users?q=${user}`,
-    
-    {Accept: "application/vnd.github.v3+json"}).then(res => res.json()).then(data =>{
-        console.log(data.items);
-        data.items.map(user=>{
-            const markup = `<li><p>Username: ${user.login}</p> 
-            <img src="${user.avatar_url}" alt="${user.login}">
-            <p><a href="${user.html_url}">Go to Profile</a></p>
-            </li>`
-            userList.insertAdjacentHTML("afterbegin", markup)
+            img.src = user.avatar_url;
+            h4.innerText = user.login;
+            a.href = user.html_url;
+            h5.innerHTML = `${user.login}'s Repositories`;
 
-            // display user repos on click of user container
-            const userLi = userList.querySelector("li")
-            userLi.addEventListener("click", ()=> displayRepos(user.login))
-
-        })
-       
-        
-    }).catch(err =>{
-        alert(err.message)
-    })
-
-}
-
-form.addEventListener("submit", getUsers)
-
-
-// display user repos
-const displayRepos = function(user){
-
-    fetch(`https://api.github.com/users/${user}/repos`).then(res => res.json()).then(data => {
-console.log(data);
-        data.map(repo=>{
-            const markup = `<li><a href="${repo.html_url}">${repo.full_name}</a></li>`
-            userList.innerHTML = ""
-            reposlist.insertAdjacentHTML("afterbegin", markup)
-
-        })
-    })
-   
-}
+            a.appendChild(profile);
+            li.appendChild(img);
+            li.appendChild(h4);
+            li.appendChild(a);
+            li.appendChild(h5);
+            ul.appendChild(li);
+          });
+        });
+    },{once: true});
+  });
